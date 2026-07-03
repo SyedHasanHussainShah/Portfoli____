@@ -1204,7 +1204,7 @@ function EducationSection({ isDark }: { isDark: boolean }) {
 }
 
 /* ── SkillCard: extracted so hooks are called at top level, not inside .map() ── */
-function SkillCard({ skill, i, isDark }: { skill: { name: string; icon: React.ReactNode; level: number }; i: number; isDark: boolean }) {
+function SkillCard({ skill, i }: { skill: { name: string; icon: React.ReactNode; level: number }; i: number; isDark: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.4 });
   return (
