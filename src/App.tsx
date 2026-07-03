@@ -20,7 +20,7 @@ import { useInView as useScrollInView } from "react-intersection-observer";
 import emailjs from "@emailjs/browser";
 import Swal from "sweetalert2";
 import "./index.css";
-import Marquee from "./components/Marquee";
+
 
 /* ════════════════════════════ TYPES ════════════════════════════ */
 interface Project {
