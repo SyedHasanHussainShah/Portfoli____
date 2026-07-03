@@ -1392,7 +1392,7 @@ function ResumeSection({ isDark }: { isDark: boolean }) {
           </p>
           <div className="resume-cta">
             <a
-              href="https://drive.google.com/uc?export=download&id=113crhUwGj_f8VfkSnCUh__zPw9PJZfHb"
+              href="https://drive.google.com/uc?export=download&id=1P9inXrHDJNVhcicA6ApfrxOYGTY837xf"
               target="_blank" rel="noopener noreferrer"
               className="btn btn-brand"
               style={{ fontSize: 14, padding: "14px 32px" }}
