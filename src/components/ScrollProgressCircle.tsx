@@ -27,6 +27,7 @@ export default function ScrollProgressCircle() {
     <button
       onClick={scrollToTop}
       aria-label="Scroll to top"
+      className="scroll-to-top"
       style={{
         position: "fixed",
         bottom: "1.5rem",
@@ -43,9 +44,10 @@ export default function ScrollProgressCircle() {
         justifyContent: "center",
         cursor: "pointer",
         boxShadow: "0 0 20px rgba(108,99,255,0.2)",
-        transition: "box-shadow 0.3s ease",
+        transition: "box-shadow 0.3s ease, opacity 0.3s ease",
         opacity: scrollPercent > 3 ? 1 : 0,
         pointerEvents: scrollPercent > 3 ? "auto" : "none",
+        touchAction: "manipulation",
       }}
       onMouseEnter={(e) =>
         ((e.currentTarget as HTMLButtonElement).style.boxShadow =

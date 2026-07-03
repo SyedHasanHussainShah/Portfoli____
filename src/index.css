@@ -29,6 +29,8 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: 90px;
   -webkit-font-smoothing: antialiased;
+  /* Prevent zoom on input focus on iOS */
+  -webkit-text-size-adjust: 100%;
 }
 
 html, body, #root { height: 100%; }
@@ -41,6 +43,8 @@ body {
   color: var(--c-text);
   overflow-x: hidden;
   position: relative;
+  /* Improve touch scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Grain overlay */
@@ -72,7 +76,7 @@ body.light-mode {
 
 .text-hero {
   font-family: var(--font-display);
-  font-size: clamp(3.2rem, 8vw, 8rem);
+  font-size: clamp(2.6rem, 10vw, 8rem);
   font-weight: 700;
   line-height: 0.95;
   letter-spacing: -0.04em;
@@ -80,7 +84,7 @@ body.light-mode {
 
 .text-section {
   font-family: var(--font-display);
-  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-size: clamp(2rem, 6vw, 4.2rem);
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -99,7 +103,7 @@ body.light-mode {
 .gx-full { background: linear-gradient(135deg, var(--c-brand) 0%, var(--c-accent) 50%, var(--c-coral) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
 /* ═══════════════════════════════ LAYOUT ═══════════════════════════════ */
-.wrap { max-width: 1260px; margin: 0 auto; padding: 0 clamp(20px, 5vw, 60px); }
+.wrap { max-width: 1260px; margin: 0 auto; padding: 0 clamp(16px, 5vw, 60px); }
 
 /* ═══════════════════════════════ CURSOR ═══════════════════════════════ */
 .cursor-ring {
@@ -147,6 +151,9 @@ body.light-mode {
   position: relative;
   overflow: hidden;
   transition: transform 0.2s var(--ease-out-expo), box-shadow 0.2s ease;
+  /* Ensure comfortable tap target on mobile */
+  min-height: 44px;
+  touch-action: manipulation;
 }
 .btn:active { transform: scale(0.97); }
 
@@ -216,6 +223,34 @@ body.light-mode {
 body.light-mode .nav-pill { background: rgba(245,244,255,0.85); border-color: rgba(124,108,255,0.15); }
 body.light-mode .nav-pill.scrolled { background: rgba(245,244,255,0.97); }
 
+/* Desktop nav links — hidden on mobile, shown on desktop */
+.nav-desktop-links {
+  display: none;
+}
+
+/* GitHub button — hidden on mobile */
+.nav-github-btn {
+  display: none !important;
+}
+
+/* Hamburger — shown on mobile */
+.nav-hamburger {
+  display: flex;
+}
+
+/* At 768px+: flip visibility */
+@media (min-width: 768px) {
+  .nav-desktop-links {
+    display: flex;
+  }
+  .nav-github-btn {
+    display: inline-flex !important;
+  }
+  .nav-hamburger {
+    display: none;
+  }
+}
+
 .nav-link {
   font-size: 13px;
   font-weight: 500;
@@ -232,6 +267,7 @@ body.light-mode .nav-link:hover { color: var(--c-brand); background: rgba(124,10
 .nav-link.active { color: #fff; background: rgba(124,108,255,0.18); font-weight: 600; }
 body.light-mode .nav-link.active { color: var(--c-brand); }
 
+
 /* ═══════════════════════════════ INPUTS ═══════════════════════════════ */
 .field {
   width: 100%;
@@ -241,9 +277,13 @@ body.light-mode .nav-link.active { color: var(--c-brand); }
   border: 1px solid var(--c-border);
   color: var(--c-text);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px; /* 16px prevents iOS zoom on focus */
   outline: none;
   transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+  /* Comfortable tap target */
+  min-height: 48px;
+  -webkit-appearance: none;
+  appearance: none;
 }
 .field::placeholder { color: var(--c-muted); }
 .field:hover { border-color: rgba(124,108,255,0.3); background: rgba(255,255,255,0.06); }
@@ -350,6 +390,14 @@ body.light-mode .field:focus { background: rgba(124,108,255,0.08); box-shadow: 0
 }
 .proj-card:hover .proj-img { transform: scale(1.06); }
 
+/* Mobile: always show overlay on cards (no hover on touch) */
+@media (pointer: coarse) {
+  .proj-card .proj-overlay {
+    opacity: 0;
+    background: linear-gradient(to top, rgba(5,5,10,0.92) 0%, rgba(5,5,10,0.4) 50%, transparent 100%);
+  }
+}
+
 /* ═══════════════════════════════ SCROLLBAR ═══════════════════════════════ */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -380,6 +428,7 @@ body.light-mode .field:focus { background: rgba(124,108,255,0.08); box-shadow: 0
   z-index: 9990;
   background: rgba(5,5,10,0.97);
   backdrop-filter: blur(40px);
+  overflow-y: auto;
 }
 
 /* ═══════════════════════════════ TIMELINE ═══════════════════════════════ */
@@ -419,4 +468,301 @@ body.light-mode .tag { background: rgba(124,108,255,0.1); color: #6c5fff; }
   }
   .marquee-track { animation: none; }
   .blob-a, .blob-b { animation: none; }
+}
+
+/* ═══════════════════════════════ MOBILE RESPONSIVE OVERRIDES ═══════════════════════════════ */
+
+/* ─── Stats grid: 2 cols on mobile instead of 4 ─── */
+@media (max-width: 600px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .stats-grid > div {
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 28px 16px !important;
+  }
+  .stats-grid > div:nth-child(odd) {
+    border-right: 1px solid rgba(255,255,255,0.06) !important;
+  }
+  .stats-grid > div:nth-child(3),
+  .stats-grid > div:nth-child(4) {
+    border-bottom: none;
+  }
+}
+
+/* ─── Featured project: stack vertically on mobile ─── */
+@media (max-width: 768px) {
+  .featured-project-grid {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .featured-project-image {
+    min-height: 220px !important;
+    max-height: 280px !important;
+  }
+  .featured-project-content {
+    padding: 28px 24px !important;
+  }
+}
+
+/* ─── Project cards grid: single column on small screens ─── */
+@media (max-width: 480px) {
+  .projects-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── Services: stack on mobile ─── */
+@media (max-width: 768px) {
+  .service-row {
+    flex-direction: column !important;
+    gap: 16px !important;
+    padding: 22px 20px !important;
+    align-items: flex-start !important;
+  }
+  .service-title-col {
+    flex: none !important;
+    width: auto !important;
+  }
+}
+
+/* ─── Looking For: single column on mobile ─── */
+@media (max-width: 768px) {
+  .looking-for-grid {
+    grid-template-columns: 1fr !important;
+    gap: 36px !important;
+  }
+}
+
+/* ─── Contact: single column on mobile ─── */
+@media (max-width: 768px) {
+  .contact-grid {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+  .contact-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+}
+
+/* ─── Education timeline: reduce indent on mobile ─── */
+@media (max-width: 480px) {
+  .timeline-wrapper {
+    padding-left: 32px !important;
+  }
+  .timeline-dot {
+    left: -26px !important;
+  }
+  .education-card {
+    padding: 20px 18px !important;
+  }
+}
+
+/* ─── Reduced section padding on mobile ─── */
+@media (max-width: 768px) {
+  .section-pad {
+    padding-top: 4rem !important;
+    padding-bottom: 4rem !important;
+  }
+}
+
+/* ─── Section header: wrap filters on mobile ─── */
+@media (max-width: 640px) {
+  .section-header-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+  }
+  .filter-buttons {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .filter-buttons::-webkit-scrollbar { display: none; }
+  .filter-buttons-inner {
+    display: flex;
+    gap: 6px;
+    width: max-content;
+  }
+}
+
+/* ─── Project modal: full-screen on mobile ─── */
+@media (max-width: 640px) {
+  .project-modal-inner {
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 95vh !important;
+    margin-top: auto !important;
+  }
+  .project-modal-content {
+    padding: 24px 20px 32px !important;
+  }
+  .project-modal-image {
+    height: 220px !important;
+  }
+  .project-modal-actions {
+    flex-wrap: wrap !important;
+  }
+}
+
+/* ─── Footer bottom bar: stack on mobile ─── */
+@media (max-width: 580px) {
+  .footer-bottom {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 12px !important;
+  }
+}
+
+/* ─── Scroll-to-top button: smaller on mobile ─── */
+@media (max-width: 480px) {
+  .scroll-to-top {
+    width: 44px !important;
+    height: 44px !important;
+    bottom: 1rem !important;
+    right: 1rem !important;
+  }
+}
+
+/* ─── Tablet breakpoints (768px - 1024px) ─── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .looking-for-grid {
+    gap: 40px !important;
+  }
+  .contact-grid {
+    gap: 28px !important;
+  }
+  .featured-project-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* ─── Skills grid: full width on small mobile ─── */
+@media (max-width: 480px) {
+  .skills-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── Availability email card: prevent overflow ─── */
+@media (max-width: 380px) {
+  .email-copy-card span {
+    font-size: 12px !important;
+    word-break: break-all;
+  }
+}
+
+/* ─── Navbar: ensure text doesn't overflow on tiny screens ─── */
+@media (max-width: 360px) {
+  .nav-logo-text {
+    display: none !important;
+  }
+}
+
+/* ─── Modal: centered on desktop, bottom-sheet on mobile ─── */
+@media (min-width: 641px) {
+  .project-modal-inner {
+    border-radius: 28px !important;
+    max-height: 90vh !important;
+    margin: auto !important;
+    align-self: center !important;
+  }
+  /* Override the parent flex alignment for desktop */
+  .project-modal-backdrop {
+    align-items: center !important;
+    padding: 20px !important;
+  }
+}
+
+/* ─── Modal bottom sheet drag handle ─── */
+.project-modal-inner::before {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.15);
+  margin: 12px auto 0;
+}
+
+@media (min-width: 641px) {
+  .project-modal-inner::before {
+    display: none;
+  }
+}
+
+/* ─── Mobile menu: larger touch targets ─── */
+@media (max-width: 768px) {
+  .mobile-menu nav a {
+    min-height: 52px;
+    display: flex !important;
+    align-items: center;
+  }
+}
+
+/* ─── Hero: ensure scroll indicator is visible on short screens ─── */
+@media (max-height: 700px) {
+  .scroll-cue {
+    display: none !important;
+  }
+}
+
+/* ─── Skills tab buttons: scrollable on tiny screens ─── */
+@media (max-width: 380px) {
+  .skills-tab-row {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 4px;
+  }
+  .skills-tab-row::-webkit-scrollbar { display: none; }
+}
+
+/* ─── Contact info: don't stretch socials on mobile ─── */
+@media (max-width: 480px) {
+  .contact-socials {
+    flex-direction: column !important;
+  }
+  .contact-socials a {
+    flex: none !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* ─── Looking-for cards: ensure they look good on 320px ─── */
+@media (max-width: 360px) {
+  .looking-for-card {
+    padding: 18px 16px !important;
+  }
+}
+
+/* ─── Section eyebrow: scale on very small screens ─── */
+@media (max-width: 360px) {
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+  }
+}
+
+/* ─── Resume section CTA: full-width on mobile ─── */
+@media (max-width: 480px) {
+  .resume-cta .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ─── Hero social circles: visible on mobile, hidden on desktop ─── */
+.hero-socials {
+  display: flex; /* shown on mobile */
+}
+@media (min-width: 768px) {
+  .hero-socials {
+    display: none !important; /* desktop has them in navbar */
+  }
 }

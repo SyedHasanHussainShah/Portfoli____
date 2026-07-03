@@ -5,7 +5,7 @@ import AnimatedName from "./components/AnimatedName";
 import ScrollProgressCircle from "./components/ScrollProgressCircle";
 import {
   Download, Mail, Code2, Menu, X, Rocket, Clock, Copy, Check,
-  ArrowRight, Zap, Layers, Sparkles, Globe, Star, ChevronRight,
+  ArrowRight, Zap, Layers, Sparkles, Globe, Star, ChevronRight, Sun, Moon,
 } from "lucide-react";
 import {
   FaBootstrap, FaReact, FaNodeJs, FaHtml5, FaCss3Alt,
@@ -20,6 +20,7 @@ import { useInView as useScrollInView } from "react-intersection-observer";
 import emailjs from "@emailjs/browser";
 import Swal from "sweetalert2";
 import "./index.css";
+import Marquee from "./components/Marquee";
 
 /* ════════════════════════════ TYPES ════════════════════════════ */
 interface Project {
@@ -195,6 +196,7 @@ const NAV_LINKS = [
   { href: "#education", label: "Education" },
   { href: "#skills", label: "Skills" },
   { href: "#looking-for", label: "Goals" },
+  { href: "#resume", label: "Resume" },
   { href: "#contact", label: "Contact" },
 ];
 
@@ -357,161 +359,118 @@ function Navbar({
   activeSection: string; navScrolled: boolean; isMenuOpen: boolean;
   setIsMenuOpen: (v: boolean) => void; isDark: boolean; toggleTheme: () => void;
 }) {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const iconBtn: React.CSSProperties = {
+    background: "none",
+    border: `1px solid ${isDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.1)"}`,
+    color: isDark ? "#e8eaf0" : "#1a1830",
+    borderRadius: "50%", width: 36, height: 36, flexShrink: 0,
+    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+    transition: "all 0.2s", touchAction: "manipulation", padding: 0,
+  };
+
   return (
     <>
-      {/* Desktop Nav */}
-      <motion.nav
-        initial={{ y: -80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.2, ease: [0.19, 1, 0.22, 1] }}
-        style={{
-          position: "fixed", top: 20, left: "50%", transform: "translateX(-50%)",
-          zIndex: 1000, width: "calc(100% - 40px)", maxWidth: 880,
-        }}
-      >
-        <div className={`nav-pill ${navScrolled ? "scrolled" : ""}`} style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "10px 16px",
-        }}>
-          {/* Logo */}
-          <a href="#home" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: 8,
-              background: "linear-gradient(135deg, #7c6cff, #00e5ff)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, fontSize: 12,
-              color: "#fff", letterSpacing: "-0.5px",
-              boxShadow: "0 0 16px rgba(124,108,255,0.5)",
-            }}>SH</div>
-            <span style={{
-              fontFamily: "Space Grotesk, sans-serif",
-              fontSize: 14, fontWeight: 600,
-              color: isDark ? "rgba(232,234,240,0.8)" : "rgba(26,24,48,0.8)",
-              letterSpacing: "-0.01em",
-            }}>Hassan</span>
+      <nav style={{ position: "fixed", top: 16, left: "50%", transform: "translateX(-50%)", zIndex: 1000, width: "calc(100% - 32px)", maxWidth: 900 }}>
+        <motion.div
+          initial={{ y: -60, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "10px 20px", borderRadius: 999,
+            background: isDark ? "rgba(17,17,24,0.82)" : "rgba(255,255,255,0.82)",
+            backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+            border: "1px solid rgba(108,99,255,0.2)",
+            boxShadow: navScrolled ? "0 8px 40px rgba(0,0,0,0.35)" : "0 4px 24px rgba(0,0,0,0.2)",
+            transition: "box-shadow 0.3s",
+          }}
+        >
+          <a href="#home" style={{ textDecoration: "none", flexShrink: 0 }}>
+            <div style={{ width: 38, height: 38, borderRadius: 10, background: "linear-gradient(135deg,#6c63ff,#00d4ff)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 15, color: "#fff", letterSpacing: "-0.5px", boxShadow: "0 0 14px rgba(108,99,255,0.5)" }}>SH</div>
           </a>
 
-          {/* Desktop links */}
-          <div className="hidden md:flex" style={{ alignItems: "center", gap: 2 }}>
-            {NAV_LINKS.map((link) => {
-              const sId = link.href.replace("#", "");
-              const active = activeSection === sId;
-              return (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  aria-current={active ? "page" : undefined}
-                  className={`nav-link ${active ? "active" : ""}`}
-                >
-                  {link.label}
-                </a>
-              );
-            })}
-          </div>
-
-          {/* Right actions */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <a
-              href={PROFILE.github} target="_blank" rel="noopener noreferrer"
-              className="btn btn-glass hidden md:inline-flex"
-              style={{ padding: "7px 14px", fontSize: 12, borderRadius: 99 }}
-            >
-              <FaGithub size={13} /> GitHub
-            </a>
-            {/* Theme toggle */}
-            <button
-              onClick={toggleTheme}
-              aria-label="Toggle theme"
-              style={{
-                width: 36, height: 36, borderRadius: 9,
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                cursor: "pointer", color: isDark ? "#e8eaf0" : "#1a1830",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 16, transition: "all 0.2s",
-              }}
-            >
-              {isDark ? "☀" : "☾"}
-            </button>
-            {/* Mobile hamburger */}
-            <button
-              className="md:hidden"
-              onClick={() => setIsMenuOpen(true)}
-              aria-label="Open menu"
-              style={{
-                width: 36, height: 36, borderRadius: 9,
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                cursor: "pointer", color: isDark ? "#e8eaf0" : "#1a1830",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}
-            >
-              <Menu size={17} />
-            </button>
-          </div>
-        </div>
-      </motion.nav>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            className="mobile-menu"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-          >
-            <div style={{ padding: "24px 28px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 48 }}>
-                <div style={{
-                  fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, fontSize: 16,
-                  color: "#e8eaf0", letterSpacing: "-0.02em",
-                }}>Hassan.</div>
-                <button
-                  onClick={() => setIsMenuOpen(false)}
-                  style={{ background: "none", border: "none", color: "#e8eaf0", cursor: "pointer" }}
-                >
-                  <X size={22} />
-                </button>
-              </div>
-              <nav style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                {NAV_LINKS.map((link, i) => (
-                  <motion.a
-                    key={link.href}
-                    href={link.href}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.07 }}
-                    onClick={() => setIsMenuOpen(false)}
-                    style={{
-                      fontFamily: "Space Grotesk, sans-serif",
-                      fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 700,
-                      color: "rgba(232,234,240,0.85)", textDecoration: "none",
-                      letterSpacing: "-0.03em", lineHeight: 1.2,
-                      padding: "10px 0",
-                      borderBottom: "1px solid rgba(255,255,255,0.05)",
-                      transition: "color 0.2s",
-                    }}
-                    onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "#7c6cff")}
-                    onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "rgba(232,234,240,0.85)")}
-                  >
-                    {link.label}
-                  </motion.a>
-                ))}
-              </nav>
-              <div style={{ marginTop: 40, display: "flex", gap: 12 }}>
-                <a href={PROFILE.github} target="_blank" rel="noreferrer" className="btn btn-glass">
-                  <FaGithub size={14} /> GitHub
-                </a>
-                <a href={`mailto:${PROFILE.email}`} className="btn btn-brand">
-                  <Mail size={14} /> Email
-                </a>
-              </div>
+          {!isMobile && (
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              {NAV_LINKS.map((link) => {
+                const sId = link.href.replace("#", "");
+                const active = activeSection === sId;
+                return (
+                  <a key={link.href} href={link.href} aria-current={active ? "page" : undefined}
+                    className={`nav-link ${active ? "active" : ""}`}
+                    style={{ padding: "6px 14px", borderRadius: 999, fontSize: 13, fontWeight: 600, textDecoration: "none", transition: "all 0.2s", color: isDark ? "rgba(241,245,249,0.8)" : "rgba(23,23,35,0.8)" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#6c63ff"; (e.currentTarget as HTMLAnchorElement).style.background = "rgba(108,99,255,0.1)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = isDark ? "rgba(241,245,249,0.8)" : "rgba(23,23,35,0.8)"; (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
+                  >{link.label}</a>
+                );
+              })}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            {!isMobile && (
+              <a href={PROFILE.github} target="_blank" rel="noopener noreferrer" style={iconBtn} aria-label="GitHub"><FaGithub size={17} /></a>
+            )}
+            {!isMobile && (
+              <a href={PROFILE.linkedin} target="_blank" rel="noopener noreferrer" style={iconBtn} aria-label="LinkedIn"><FaLinkedin size={17} style={{ color: "#0077b5" }} /></a>
+            )}
+            <button onClick={toggleTheme} aria-label="Toggle theme" style={{ ...iconBtn, overflow: "hidden" }}>
+              <AnimatePresence mode="wait" initial={false}>
+                {isDark ? (
+                  <motion.div key="sun" initial={{ opacity: 0, y: 10, scale: 0.6 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.6 }} transition={{ duration: 0.25 }} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Sun size={16} style={{ color: "#fbbf24" }} />
+                  </motion.div>
+                ) : (
+                  <motion.div key="moon" initial={{ opacity: 0, y: 10, scale: 0.6 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.6 }} transition={{ duration: 0.25 }} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Moon size={16} style={{ color: "#7c6cff" }} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </button>
+            {isMobile && (
+              <button onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Menu" style={iconBtn}>
+                <AnimatePresence mode="wait" initial={false}>
+                  {isMenuOpen ? (
+                    <motion.span key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }} style={{ display: "flex" }}><X size={16} /></motion.span>
+                  ) : (
+                    <motion.span key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }} style={{ display: "flex" }}><Menu size={16} /></motion.span>
+                  )}
+                </AnimatePresence>
+              </button>
+            )}
+          </div>
+        </motion.div>
+
+        <AnimatePresence>
+          {isMenuOpen && isMobile && (
+            <motion.div
+              initial={{ opacity: 0, y: -16, scaleY: 0.9 }} animate={{ opacity: 1, y: 0, scaleY: 1 }} exit={{ opacity: 0, y: -16, scaleY: 0.9 }}
+              transition={{ duration: 0.25 }}
+              style={{ marginTop: 8, padding: "20px 24px", borderRadius: 24, background: isDark ? "rgba(10,10,18,0.97)" : "rgba(255,255,255,0.97)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(108,99,255,0.2)", boxShadow: "0 16px 48px rgba(0,0,0,0.3)", transformOrigin: "top center" }}
+            >
+              {NAV_LINKS.map((link, i) => (
+                <motion.a key={link.href} href={link.href} onClick={() => setIsMenuOpen(false)}
+                  initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}
+                  style={{ display: "block", padding: "14px 4px", fontSize: 20, fontWeight: 700, color: isDark ? "#f1f5f9" : "#171723", textDecoration: "none", borderBottom: i < NAV_LINKS.length - 1 ? `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}` : "none", letterSpacing: "-0.02em", transition: "color 0.2s" }}
+                  onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "#6c63ff")}
+                  onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = isDark ? "#f1f5f9" : "#171723")}
+                >{link.label}</motion.a>
+              ))}
+              <div style={{ marginTop: 16, display: "flex", gap: 10 }}>
+                <a href={PROFILE.github} target="_blank" rel="noreferrer" className="btn btn-glass" style={{ flex: 1, justifyContent: "center" }}><FaGithub size={14} /> GitHub</a>
+                <a href={`mailto:${PROFILE.email}`} className="btn btn-brand" style={{ flex: 1, justifyContent: "center" }}><Mail size={14} /> Email</a>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </nav>
     </>
   );
 }
@@ -528,7 +487,7 @@ function Hero({ isDark }: { isDark: boolean }) {
     <section
       id="home"
       ref={containerRef}
-      style={{ minHeight: "100svh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", position: "relative", overflow: "hidden" }}
+      style={{ minHeight: "100svh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", position: "relative", overflow: "hidden", paddingTop: "80px" }}
     >
       {/* Background glow blobs */}
       <div className="blob-a" style={{
@@ -560,18 +519,15 @@ function Hero({ isDark }: { isDark: boolean }) {
 
       <motion.div
         ref={ref}
-        style={{ y, opacity, position: "relative", zIndex: 10, textAlign: "center", padding: "0 20px", maxWidth: 1000 }}
+        style={{ y, opacity, position: "relative", zIndex: 10, textAlign: "center", padding: "0 clamp(16px, 5vw, 20px)", maxWidth: 1000, width: "100%" }}
       >
-        <br>
-        </br>
-        <br></br>
         {/* Main heading */}
         <motion.h1
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.2, ease: [0.19, 1, 0.22, 1] }}
           className="text-hero"
-          style={{ marginBottom: 24 }}
+          style={{ marginBottom: 20 }}
         >
           <AnimatedName />
         </motion.h1>
@@ -582,12 +538,12 @@ function Hero({ isDark }: { isDark: boolean }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.4 }}
           style={{
-            fontSize: "clamp(1rem, 2.5vw, 1.35rem)",
+            fontSize: "clamp(0.95rem, 3.5vw, 1.35rem)",
             color: isDark ? "rgba(200,205,220,0.6)" : "rgba(80,75,120,0.65)",
-            marginBottom: 18, fontWeight: 400, letterSpacing: "-0.01em",
+            marginBottom: 14, fontWeight: 400, letterSpacing: "-0.01em",
           }}
         >
-          Building with{" "}
+          Working with{" "}
           <span style={{
             color: "#7c6cff", fontWeight: 600,
             borderBottom: "1px solid rgba(124,108,255,0.4)", paddingBottom: 2,
@@ -602,9 +558,9 @@ function Hero({ isDark }: { isDark: boolean }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.5 }}
           style={{
-            fontSize: "clamp(0.9rem, 1.5vw, 1.05rem)",
+            fontSize: "clamp(0.85rem, 3vw, 1.05rem)",
             color: isDark ? "rgba(200,205,220,0.5)" : "rgba(80,75,120,0.55)",
-            maxWidth: 560, margin: "0 auto 42px", lineHeight: 1.75,
+            maxWidth: 560, margin: "0 auto 32px", lineHeight: 1.75,
           }}
         >
           Full-stack developer from Gujranwala, Pakistan — crafting digital experiences that live at the intersection of{" "}
@@ -617,7 +573,7 @@ function Hero({ isDark }: { isDark: boolean }) {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.6 }}
-          style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center", alignItems: "center", marginBottom: 56 }}
+          style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center", alignItems: "center", marginBottom: 40 }}
         >
           <a href="#projects" className="btn btn-brand" style={{ fontSize: 14, padding: "13px 28px" }}>
             View my work <ArrowRight size={15} />
@@ -640,11 +596,12 @@ function Hero({ isDark }: { isDark: boolean }) {
           </a>
         </motion.div>
 
-        {/* Social links */}
+        {/* Social links — mobile only */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
+          className="hero-socials"
           style={{ display: "flex", gap: 12, justifyContent: "center" }}
         >
           {[
@@ -734,10 +691,10 @@ function SkillStrip({ isDark }: { isDark: boolean }) {
 /* ════════════════════════════ STATS ════════════════════════════ */
 function StatsSection({ isDark }: { isDark: boolean }) {
   return (
-    <section className="wrap" style={{ paddingTop: "5rem", paddingBottom: "5rem" }}>
-      <div style={{
+    <section className="wrap" style={{ paddingTop: "clamp(3rem, 6vw, 5rem)", paddingBottom: "clamp(3rem, 6vw, 5rem)" }}>
+      <div className="stats-grid" style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+        gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
         gap: 1,
         borderRadius: 24,
         overflow: "hidden",
@@ -756,7 +713,7 @@ function StatsSection({ isDark }: { isDark: boolean }) {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: i * 0.1 }}
               style={{
-                padding: "40px 36px",
+                padding: "clamp(24px, 4vw, 40px) clamp(16px, 3vw, 36px)",
                 textAlign: "center",
                 borderRight: i < STATS.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none",
                 background: "transparent",
@@ -793,7 +750,7 @@ function ProjectsSection({ isDark, setExpandedProject }: { isDark: boolean; setE
   const filtered = activeFilter === "All" ? PROJECTS : PROJECTS.filter((p) => p.category === activeFilter);
 
   return (
-    <section id="projects" style={{ padding: "7rem 0" }}>
+    <section id="projects" className="section-pad" style={{ padding: "7rem 0" }}>
       <div className="wrap">
         {/* Header */}
         <motion.div
@@ -804,27 +761,29 @@ function ProjectsSection({ isDark, setExpandedProject }: { isDark: boolean; setE
           style={{ marginBottom: 56 }}
         >
           <p className="eyebrow" style={{ marginBottom: 16 }}>Selected Work</p>
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 24 }}>
+          <div className="section-header-row" style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
             <h2 className="text-section">
               Projects that{" "}
               <span className="gx">ship.</span>
             </h2>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveFilter(cat)}
-                  style={{
-                    padding: "6px 14px", borderRadius: 99, fontSize: 12, fontWeight: 600,
-                    background: activeFilter === cat ? "#7c6cff" : "rgba(255,255,255,0.05)",
-                    border: `1px solid ${activeFilter === cat ? "#7c6cff" : "rgba(255,255,255,0.08)"}`,
-                    color: activeFilter === cat ? "#fff" : isDark ? "rgba(200,205,220,0.6)" : "rgba(80,75,120,0.65)",
-                    cursor: "pointer", transition: "all 0.2s",
-                  }}
-                >
-                  {cat}
-                </button>
-              ))}
+            <div className="filter-buttons">
+              <div className="filter-buttons-inner">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveFilter(cat)}
+                    style={{
+                      padding: "6px 14px", borderRadius: 99, fontSize: 12, fontWeight: 600,
+                      background: activeFilter === cat ? "#7c6cff" : "rgba(255,255,255,0.05)",
+                      border: `1px solid ${activeFilter === cat ? "#7c6cff" : "rgba(255,255,255,0.08)"}`,
+                      color: activeFilter === cat ? "#fff" : isDark ? "rgba(200,205,220,0.6)" : "rgba(80,75,120,0.65)",
+                      cursor: "pointer", transition: "all 0.2s",
+                    }}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </motion.div>
@@ -841,13 +800,12 @@ function ProjectsSection({ isDark, setExpandedProject }: { isDark: boolean; setE
             onClick={() => setExpandedProject(filtered[0])}
             className="proj-card surface card-hover"
             style={{
-              display: "grid", gridTemplateColumns: "1fr",
               overflow: "hidden", marginBottom: 20, cursor: "pointer",
             }}
           >
-            <div className="md:grid" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr" }}>
+            <div className="featured-project-grid" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr" }}>
               {/* Image */}
-              <div style={{ position: "relative", overflow: "hidden", minHeight: 380 }}>
+              <div className="featured-project-image" style={{ position: "relative", overflow: "hidden", minHeight: 380 }}>
                 <img
                   src={filtered[0].image}
                   alt={filtered[0].title}
@@ -868,7 +826,7 @@ function ProjectsSection({ isDark, setExpandedProject }: { isDark: boolean; setE
                 </div>
               </div>
               {/* Content */}
-              <div style={{ padding: "48px 44px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <div className="featured-project-content" style={{ padding: "48px 44px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
                 <p className="eyebrow" style={{ marginBottom: 14 }}>{filtered[0].category}</p>
                 <h3 className="text-card-title" style={{
                   fontFamily: "Space Grotesk, sans-serif", fontSize: "clamp(1.5rem, 2.5vw, 2.2rem)",
@@ -907,9 +865,9 @@ function ProjectsSection({ isDark, setExpandedProject }: { isDark: boolean; setE
         )}
 
         {/* Grid */}
-        <div style={{
+        <div className="projects-grid" style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 320px), 1fr))",
           gap: 16,
         }}>
           {filtered.slice(1).map((p, idx) => (
@@ -1012,23 +970,26 @@ function ProjectModal({ project, onClose, isDark }: { project: Project; onClose:
       style={{
         position: "fixed", inset: 0, zIndex: 2000,
         background: "rgba(5,5,10,0.9)", backdropFilter: "blur(20px)",
-        display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+        display: "flex", alignItems: "flex-end", justifyContent: "center",
+        padding: 0,
       }}
+      className="project-modal-backdrop"
     >
       <motion.div
-        initial={{ scale: 0.88, opacity: 0, y: 32 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.92, opacity: 0 }}
-        transition={{ type: "spring", damping: 22, stiffness: 260 }}
+        initial={{ y: "100%", opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: "100%", opacity: 0 }}
+        transition={{ type: "spring", damping: 28, stiffness: 280 }}
         onClick={(e) => e.stopPropagation()}
-        className="surface"
+        className="surface project-modal-inner"
         style={{
-          width: "100%", maxWidth: 740, maxHeight: "90vh",
-          overflowY: "auto", borderRadius: 28,
+          width: "100%", maxWidth: 740, maxHeight: "92vh",
+          overflowY: "auto", borderRadius: "28px 28px 0 0",
+          margin: "0",
         }}
       >
         {/* Image */}
-        <div style={{ position: "relative", height: 280, overflow: "hidden" }}>
+        <div className="project-modal-image" style={{ position: "relative", height: 280, overflow: "hidden", flexShrink: 0 }}>
           <img src={project.image} alt={project.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,5,10,0.85) 0%, transparent 60%)" }} />
           <button
@@ -1045,7 +1006,7 @@ function ProjectModal({ project, onClose, isDark }: { project: Project; onClose:
           </button>
         </div>
         {/* Content */}
-        <div style={{ padding: "32px 36px 40px" }}>
+        <div className="project-modal-content" style={{ padding: "32px 36px 40px" }}>
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 16, flexWrap: "wrap" }}>
             <div>
               <p className="eyebrow" style={{ marginBottom: 6 }}>{project.category}</p>
@@ -1053,7 +1014,7 @@ function ProjectModal({ project, onClose, isDark }: { project: Project; onClose:
                 {project.title}
               </h3>
             </div>
-            <div style={{ display: "flex", gap: 10 }}>
+            <div className="project-modal-actions" style={{ display: "flex", gap: 10 }}>
               <a href={project.link} target="_blank" rel="noreferrer" className="btn btn-brand" style={{ fontSize: 13, padding: "9px 18px" }}>
                 <Globe size={13} /> Live
               </a>
@@ -1092,14 +1053,14 @@ const SERVICES = [
 
 function ServicesSection({ isDark }: { isDark: boolean }) {
   return (
-    <section style={{ padding: "7rem 0", background: isDark ? "rgba(124,108,255,0.025)" : "rgba(124,108,255,0.03)" }}>
+    <section className="section-pad" style={{ padding: "7rem 0", background: isDark ? "rgba(124,108,255,0.025)" : "rgba(124,108,255,0.03)" }}>
       <div className="wrap">
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.7, ease: [0.19, 1, 0.22, 1] }}
-          style={{ marginBottom: 60 }}
+          style={{ marginBottom: 48 }}
         >
           <p className="eyebrow" style={{ marginBottom: 16 }}>What I Do</p>
           <h2 className="text-section">
@@ -1117,9 +1078,10 @@ function ServicesSection({ isDark }: { isDark: boolean }) {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.6, delay: i * 0.08, ease: [0.19, 1, 0.22, 1] }}
+              className="service-row"
               style={{
-                display: "flex", alignItems: "center", gap: 32,
-                padding: "28px 32px",
+                display: "flex", alignItems: "center", gap: 28,
+                padding: "24px 28px",
                 borderRadius: i === 0 ? "20px 20px 0 0" : i === SERVICES.length - 1 ? "0 0 20px 20px" : 0,
                 background: isDark ? "rgba(15,15,24,0.8)" : "rgba(255,255,255,0.85)",
                 border: "1px solid rgba(255,255,255,0.06)",
@@ -1150,7 +1112,7 @@ function ServicesSection({ isDark }: { isDark: boolean }) {
                 color: s.color,
               }}>{s.icon}</div>
               {/* Title */}
-              <div style={{ flex: "0 0 220px" }}>
+              <div className="service-title-col" style={{ flex: "0 0 200px" }}>
                 <h3 style={{
                   fontFamily: "Space Grotesk, sans-serif",
                   fontSize: 16, fontWeight: 700, letterSpacing: "-0.02em",
@@ -1174,7 +1136,7 @@ function ServicesSection({ isDark }: { isDark: boolean }) {
 /* ════════════════════════════ EDUCATION ════════════════════════════ */
 function EducationSection({ isDark }: { isDark: boolean }) {
   return (
-    <section id="education" style={{ padding: "7rem 0" }}>
+    <section id="education" className="section-pad" style={{ padding: "7rem 0" }}>
       <div className="wrap">
         <motion.div
           initial={{ opacity: 0, y: 32 }}
@@ -1187,7 +1149,7 @@ function EducationSection({ isDark }: { isDark: boolean }) {
           <h2 className="text-section">Education</h2>
         </motion.div>
 
-        <div style={{ position: "relative", paddingLeft: 48 }}>
+        <div className="timeline-wrapper" style={{ position: "relative", paddingLeft: 48 }}>
           <div className="timeline-line" />
           {EDUCATION.map((edu, i) => (
             <motion.div
@@ -1199,18 +1161,18 @@ function EducationSection({ isDark }: { isDark: boolean }) {
               style={{ marginBottom: 32, position: "relative" }}
             >
               {/* Dot */}
-              <div style={{
+              <div className="timeline-dot" style={{
                 position: "absolute", left: -36, top: 4,
                 width: 12, height: 12, borderRadius: "50%",
                 background: "linear-gradient(135deg, #7c6cff, #00e5ff)",
                 boxShadow: "0 0 16px rgba(124,108,255,0.6)",
               }} />
-              <div className="surface card-hover" style={{ padding: "28px 32px", borderRadius: 20 }}>
+              <div className="education-card surface card-hover" style={{ padding: "24px 28px", borderRadius: 20 }}>
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 10 }}>
-                  <div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
                       fontFamily: "Space Grotesk, sans-serif",
-                      fontSize: 17, fontWeight: 700, letterSpacing: "-0.02em", marginBottom: 4,
+                      fontSize: "clamp(15px, 3vw, 17px)", fontWeight: 700, letterSpacing: "-0.02em", marginBottom: 4,
                     }}>
                       {edu.degree}
                     </div>
@@ -1247,7 +1209,7 @@ function SkillsSection({ isDark }: { isDark: boolean }) {
   const tabs = Object.keys(SKILLS_DATA) as (keyof typeof SKILLS_DATA)[];
 
   return (
-    <section id="skills" style={{ padding: "7rem 0", background: isDark ? "rgba(124,108,255,0.025)" : "rgba(124,108,255,0.03)" }}>
+    <section id="skills" className="section-pad" style={{ padding: "7rem 0", background: isDark ? "rgba(124,108,255,0.025)" : "rgba(124,108,255,0.03)" }}>
       <div className="wrap">
         <motion.div
           initial={{ opacity: 0, y: 32 }}
@@ -1264,7 +1226,7 @@ function SkillsSection({ isDark }: { isDark: boolean }) {
         </motion.div>
 
         {/* Tab switcher */}
-        <div style={{ display: "flex", gap: 6, marginBottom: 36, borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: 16 }}>
+        <div className="skills-tab-row" style={{ display: "flex", gap: 6, marginBottom: 36, borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: 16 }}>
           {tabs.map((tab) => (
             <button
               key={tab}
@@ -1289,7 +1251,8 @@ function SkillsSection({ isDark }: { isDark: boolean }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.3 }}
-            style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}
+            className="skills-grid"
+            style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 240px), 1fr))", gap: 12 }}
           >
             {SKILLS_DATA[activeTab].map((skill, i) => {
               const ref = useRef<HTMLDivElement>(null);
@@ -1347,9 +1310,9 @@ function LookingForSection({ isDark }: { isDark: boolean }) {
   ];
 
   return (
-    <section id="looking-for" style={{ padding: "7rem 0" }}>
+    <section id="looking-for" className="section-pad" style={{ padding: "7rem 0" }}>
       <div className="wrap">
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60, alignItems: "center" }}>
+        <div className="looking-for-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60, alignItems: "center" }}>
           <motion.div
             initial={{ opacity: 0, x: -32 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -1373,7 +1336,7 @@ function LookingForSection({ isDark }: { isDark: boolean }) {
             </a>
           </motion.div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 180px), 1fr))", gap: 12 }}>
             {items.map((item, i) => (
               <motion.div
                 key={item.title}
@@ -1409,7 +1372,7 @@ function LookingForSection({ isDark }: { isDark: boolean }) {
 /* ════════════════════════════ RESUME ════════════════════════════ */
 function ResumeSection({ isDark }: { isDark: boolean }) {
   return (
-    <section id="resume" style={{ padding: "7rem 0", background: isDark ? "rgba(124,108,255,0.025)" : "rgba(124,108,255,0.03)" }}>
+    <section id="resume" className="section-pad" style={{ padding: "7rem 0", background: isDark ? "rgba(124,108,255,0.025)" : "rgba(124,108,255,0.03)" }}>
       <div className="wrap" style={{ textAlign: "center" }}>
         <motion.div
           initial={{ opacity: 0, y: 32 }}
@@ -1427,14 +1390,16 @@ function ResumeSection({ isDark }: { isDark: boolean }) {
           }}>
             A full overview of my experience, education, and technical skills.
           </p>
-          <a
-            href="https://drive.google.com/uc?export=download&id=113crhUwGj_f8VfkSnCUh__zPw9PJZfHb"
-            target="_blank" rel="noopener noreferrer"
-            className="btn btn-brand"
-            style={{ fontSize: 14, padding: "14px 32px" }}
-          >
-            <Download size={15} /> Download PDF
-          </a>
+          <div className="resume-cta">
+            <a
+              href="https://drive.google.com/uc?export=download&id=113crhUwGj_f8VfkSnCUh__zPw9PJZfHb"
+              target="_blank" rel="noopener noreferrer"
+              className="btn btn-brand"
+              style={{ fontSize: 14, padding: "14px 32px" }}
+            >
+              <Download size={15} /> Download PDF
+            </a>
+          </div>
         </motion.div>
       </div>
     </section>
@@ -1447,7 +1412,7 @@ function ContactSection({ isDark, sendEmail, copied, copyEmail }: {
   copied: boolean; copyEmail: () => void;
 }) {
   return (
-    <section id="contact" style={{ padding: "7rem 0" }}>
+    <section id="contact" className="section-pad" style={{ padding: "7rem 0" }}>
       <div className="wrap">
         <motion.div
           initial={{ opacity: 0, y: 32 }}
@@ -1463,7 +1428,7 @@ function ContactSection({ isDark, sendEmail, copied, copyEmail }: {
           </h2>
         </motion.div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: 40, alignItems: "start" }}>
+        <div className="contact-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: 40, alignItems: "start" }}>
           {/* Left info */}
           <motion.div
             initial={{ opacity: 0, x: -32 }}
@@ -1492,12 +1457,12 @@ function ContactSection({ isDark, sendEmail, copied, copyEmail }: {
 
               {/* Email copy */}
               <div
-                className="surface card-hover"
-                style={{ padding: "18px 22px", borderRadius: 18, display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
+                className="email-copy-card surface card-hover"
+                style={{ padding: "16px 18px", borderRadius: 18, display: "flex", alignItems: "center", gap: 12, cursor: "pointer", overflow: "hidden" }}
                 onClick={copyEmail}
               >
                 <Mail size={18} style={{ color: "#7c6cff", flexShrink: 0 }} />
-                <span style={{ flex: 1, fontSize: 14, fontWeight: 500 }}>{PROFILE.email}</span>
+                <span style={{ flex: 1, fontSize: "clamp(11px, 3vw, 14px)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{PROFILE.email}</span>
                 <AnimatePresence mode="wait">
                   {copied ? (
                     <motion.span key="c" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
@@ -1515,7 +1480,7 @@ function ContactSection({ isDark, sendEmail, copied, copyEmail }: {
             </div>
 
             {/* Socials */}
-            <div style={{ display: "flex", gap: 10 }}>
+            <div className="contact-socials" style={{ display: "flex", gap: 10 }}>
               {[
                 { href: PROFILE.github, icon: <FaGithub size={16} />, label: "GitHub" },
                 { href: PROFILE.linkedin, icon: <FaLinkedin size={16} style={{ color: "#0077b5" }} />, label: "LinkedIn" },
@@ -1544,9 +1509,9 @@ function ContactSection({ isDark, sendEmail, copied, copyEmail }: {
             transition={{ duration: 0.7, delay: 0.1, ease: [0.19, 1, 0.22, 1] }}
             onSubmit={sendEmail}
             className="surface"
-            style={{ padding: "36px 36px 40px", borderRadius: 28, display: "flex", flexDirection: "column", gap: 20 }}
+            style={{ padding: "clamp(24px, 5vw, 36px)", borderRadius: 28, display: "flex", flexDirection: "column", gap: 20 }}
           >
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <div className="contact-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <div>
                 <label htmlFor="cnt-name" style={{ display: "block", marginBottom: 8, fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#7c6cff" }}>Name</label>
                 <input id="cnt-name" name="name" type="text" placeholder="Your name" required className="field" />
@@ -1616,8 +1581,8 @@ function Footer({ isDark }: { isDark: boolean }) {
       </div>
 
       {/* Bottom bar */}
-      <div className="wrap" style={{ padding: "28px 0" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+      <div className="wrap" style={{ padding: "24px 0" }}>
+        <div className="footer-bottom" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{
               width: 28, height: 28, borderRadius: 7,

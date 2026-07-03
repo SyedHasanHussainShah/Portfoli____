@@ -28,14 +28,20 @@ export default function AnimatedName() {
   return (
     <h1 className="heading-xl">
       <span
-        className="block text-xl sm:text-2xl font-light mb-1"
-        style={{ color: "rgba(148,163,184,0.8)" }}
+        style={{
+          display: "block",
+          fontSize: "clamp(1.1rem, 3vw, 1.4rem)",
+          fontWeight: 300,
+          marginBottom: "0.35em",
+          color: "rgba(148,163,184,0.85)",
+          letterSpacing: "0.02em",
+        }}
       >
         Hi, I'm
       </span>
       <span
-        className="gradient-text block"
-        style={{ minHeight: "1.1em" }}
+        className="gradient-text"
+        style={{ display: "block", minHeight: "1.1em" }}
       >
         {text}
         <span
