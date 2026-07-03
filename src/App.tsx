@@ -1203,6 +1203,47 @@ function EducationSection({ isDark }: { isDark: boolean }) {
   );
 }
 
+/* ── SkillCard: extracted so hooks are called at top level, not inside .map() ── */
+function SkillCard({ skill, i, isDark }: { skill: { name: string; icon: React.ReactNode; level: number }; i: number; isDark: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.4 });
+  return (
+    <motion.div
+      ref={ref}
+      key={skill.name}
+      initial={{ opacity: 0, y: 16 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5, delay: i * 0.04 }}
+      className="surface card-hover"
+      style={{ padding: "20px 22px", borderRadius: 16 }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 20 }}>{skill.icon}</span>
+          <span style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 600, fontSize: 14, letterSpacing: "-0.01em" }}>
+            {skill.name}
+          </span>
+        </div>
+        <span style={{
+          fontSize: 12, fontWeight: 700,
+          background: "linear-gradient(135deg, #7c6cff, #00e5ff)",
+          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+        }}>
+          {skill.level}%
+        </span>
+      </div>
+      <div className="bar-track">
+        <motion.div
+          className="bar-fill"
+          initial={{ width: 0 }}
+          animate={inView ? { width: `${skill.level}%` } : {}}
+          transition={{ duration: 1.2, delay: 0.2 + i * 0.04, ease: "easeOut" }}
+        />
+      </div>
+    </motion.div>
+  );
+}
+
 /* ════════════════════════════ SKILLS ════════════════════════════ */
 function SkillsSection({ isDark }: { isDark: boolean }) {
   const [activeTab, setActiveTab] = useState<keyof typeof SKILLS_DATA>("Frontend");
@@ -1254,45 +1295,9 @@ function SkillsSection({ isDark }: { isDark: boolean }) {
             className="skills-grid"
             style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 240px), 1fr))", gap: 12 }}
           >
-            {SKILLS_DATA[activeTab].map((skill, i) => {
-              const ref = useRef<HTMLDivElement>(null);
-              const inView = useInView(ref, { once: true, amount: 0.4 });
-              return (
-                <motion.div
-                  key={skill.name}
-                  ref={ref}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={inView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.5, delay: i * 0.04 }}
-                  className="surface card-hover"
-                  style={{ padding: "20px 22px", borderRadius: 16 }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <span style={{ fontSize: 20 }}>{skill.icon}</span>
-                      <span style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 600, fontSize: 14, letterSpacing: "-0.01em" }}>
-                        {skill.name}
-                      </span>
-                    </div>
-                    <span style={{
-                      fontSize: 12, fontWeight: 700,
-                      background: "linear-gradient(135deg, #7c6cff, #00e5ff)",
-                      WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-                    }}>
-                      {skill.level}%
-                    </span>
-                  </div>
-                  <div className="bar-track">
-                    <motion.div
-                      className="bar-fill"
-                      initial={{ width: 0 }}
-                      animate={inView ? { width: `${skill.level}%` } : {}}
-                      transition={{ duration: 1.2, delay: 0.2 + i * 0.04, ease: "easeOut" }}
-                    />
-                  </div>
-                </motion.div>
-              );
-            })}
+            {SKILLS_DATA[activeTab].map((skill, i) => (
+              <SkillCard key={skill.name} skill={skill} i={i} isDark={isDark} />
+            ))}
           </motion.div>
         </AnimatePresence>
       </div>
